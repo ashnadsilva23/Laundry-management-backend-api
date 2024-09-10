@@ -4,6 +4,7 @@ const cors=require('cors')
 const jwt=require('jsonwebtoken')
 const bcrypt=require('bcrypt')
 const userModel = require('./models/users')
+const adminModel = require('./models/adminmodel')
 
 
 
@@ -71,10 +72,52 @@ app.post("/signUp",async(req,res)=>{
     (error)=>{}
    )
 
-        
-  
-
+    
 })
+
+app.post("/adminlogin", (req, res) => {
+    let input = req.body;
+
+    // Default admin credentials
+    const adminEmail = 'admin@gmail.com';
+    const adminPassword = 'admin123';
+
+    // Check if the input matches admin credentials
+    if (input.email === adminEmail && input.password === adminPassword) {
+        // Admin login successful
+        jwt.sign({ email: input.email }, "laundryapp", { expiresIn: "1d" }, (error, token) => {
+            if (error) {
+                res.json({ "status": "Token credentials failed" });
+            } else {
+                res.json({ "status": "success", "token": token, "message": "Admin logged in successfully" });
+            }
+        });
+    } else {
+        // Check if the user exists in the database
+        adminModel.find({ name: input.name }).then((response) => {
+            if (response.length > 0) {
+                const validator = bcrypt.compareSync(input.password, response[0].password);
+                if (validator) {
+                    // User login successful
+                    jwt.sign({ email: input.email}, "laundryapp", { expiresIn: "1d" }, (error, token) => {
+                        if (error) {
+                            res.json({ "status": "Token credentials failed" });
+                        } else {
+                            res.json({ "status": "success", "token": token });
+                        }
+                    });
+                } else {
+                    res.json({ "status": "Wrong password" });
+                }
+            } else {
+                res.json({ "status": "Username doesn't exist" });
+            }
+        }).catch((err) => {
+            res.json({ "status": "Error occurred", "error": err.message });
+        });
+    }
+});   
+
 app.listen(3030,()=>{
     console.log("server started")
 })
