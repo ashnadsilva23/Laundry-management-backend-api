@@ -16,7 +16,27 @@ app.use(cors())
 mongoose.connect("mongodb+srv://ashna:ashna@cluster0.n9qo4.mongodb.net/LaundryDB?retryWrites=true&w=majority&appName=Cluster0")
 
 
+//view users
+app.post("/view",(req,res)=>{
+    let token =req.headers["token"]
+    jwt.verify(token,"laundryapp",(error,decoded)=>{
+        if(error)
+            {
+                res.json({"status":"unauthorised access"})
+            }
+            else{
+                if(decoded){
+                    userModel.find().then(
+                    (response)=>{
+                        res.json(response)
+                    }
+                ).catch().finally()
 
+            }
+        }
+    })
+    
+})
 
 //signin
 app.post("/signIn",async(req,res)=>{
