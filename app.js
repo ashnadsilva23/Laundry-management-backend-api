@@ -16,6 +16,8 @@ app.use(cors())
 mongoose.connect("mongodb+srv://ashna:ashna@cluster0.n9qo4.mongodb.net/LaundryDB?retryWrites=true&w=majority&appName=Cluster0")
 
 
+
+
 //signin
 app.post("/signIn",async(req,res)=>{
     let input =req.body
